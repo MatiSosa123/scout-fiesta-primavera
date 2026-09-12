@@ -4,7 +4,6 @@ import { Search, UserPlus, Trash2, CheckCircle2, Circle } from 'lucide-react';
 function App() {
   // Estado principal: la lista de asistentes
   const [asistentes, setAsistentes] = useState(() => {
-    // Esto hace que si recargás la página, los datos no se borren (LocalStorage)
     const guardados = localStorage.getItem('asistentesFiesta');
     return guardados ? JSON.parse(guardados) : [];
   });
@@ -12,13 +11,16 @@ function App() {
   // Estado para el buscador
   const [busqueda, setBusqueda] = useState('');
 
+  // NUEVO: Estado para el ordenamiento
+  const [orden, setOrden] = useState('default'); // Opciones: 'default', 'nombre', 'apellido'
+
   // Estado para el formulario de nuevo ingreso
   const [form, setForm] = useState({
     nombre: '',
     apellido: '',
     dni: '',
-    tipo: 'Scout', // Opciones: Scout, Invitado, Padre
-    pago: 'Preventa' // Opciones: Preventa, Puerta, Debe
+    tipo: 'Scout',
+    pago: 'Preventa'
   });
 
   // Guardar en LocalStorage cada vez que la lista cambia
@@ -26,58 +28,59 @@ function App() {
     localStorage.setItem('asistentesFiesta', JSON.stringify(asistentes));
   }, [asistentes]);
 
-  // Función para agregar un asistente
   const agregarAsistente = (e) => {
     e.preventDefault();
     if (!form.nombre || !form.apellido || !form.dni) return;
 
     const nuevoAsistente = {
-      id: Date.now(), // ID único
+      id: Date.now(),
       ...form,
-      asistio: false // Por defecto no vino
+      asistio: false
     };
 
     setAsistentes([...asistentes, nuevoAsistente]);
-    // Limpiar formulario
     setForm({ nombre: '', apellido: '', dni: '', tipo: 'Scout', pago: 'Preventa' });
   };
 
-  // Función para eliminar un asistente
   const eliminarAsistente = (id) => {
     if (window.confirm('¿Estás seguro de eliminar a esta persona?')) {
       setAsistentes(asistentes.filter(a => a.id !== id));
     }
   };
 
-  // Función para alternar el check de "Asistió"
   const toggleAsistio = (id) => {
     setAsistentes(asistentes.map(a => 
       a.id === id ? { ...a, asistio: !a.asistio } : a
     ));
   };
 
-  // Función para cambiar el estado de pago
   const cambiarPago = (id, nuevoPago) => {
     setAsistentes(asistentes.map(a => 
       a.id === id ? { ...a, pago: nuevoPago } : a
     ));
   };
 
-  // --- Lógica de Filtrado ---
-  const asistentesFiltrados = asistentes.filter(a => {
-    const texto = busqueda.toLowerCase();
-    return (
-      a.nombre.toLowerCase().includes(texto) ||
-      a.apellido.toLowerCase().includes(texto) ||
-      a.dni.includes(texto)
-    );
-  });
+  // --- Lógica de Filtrado y Ordenamiento ---
+  const asistentesFiltradosYOrdenados = asistentes
+    .filter(a => {
+      const texto = busqueda.toLowerCase();
+      return (
+        a.nombre.toLowerCase().includes(texto) ||
+        a.apellido.toLowerCase().includes(texto) ||
+        a.dni.includes(texto)
+      );
+    })
+    .sort((a, b) => {
+      if (orden === 'nombre') return a.nombre.localeCompare(b.nombre);
+      if (orden === 'apellido') return a.apellido.localeCompare(b.apellido);
+      return 0; // Si es 'default', no ordena
+    });
 
   // --- Lógica de Recaudación ---
   const calcularTotal = () => {
     let total = 0;
     asistentes.forEach(a => {
-      if (a.tipo === 'Padre') return; // Padres no pagan
+      if (a.tipo === 'Padre') return; 
       if (a.pago === 'Preventa') total += 6000;
       if (a.pago === 'Puerta') total += 7000;
     });
@@ -132,7 +135,7 @@ function App() {
             <select 
               className="border p-2 rounded focus:outline-blue-500"
               value={form.pago} onChange={e => setForm({...form, pago: e.target.value})}
-              disabled={form.tipo === 'Padre'} // Si es padre, no puede elegir pago
+              disabled={form.tipo === 'Padre'}
             >
               <option value="Preventa">Pagó Preventa ($6.000)</option>
               <option value="Puerta">Pagó en Puerta ($7.000)</option>
@@ -144,17 +147,31 @@ function App() {
           </form>
         </div>
 
-        {/* Buscador y Tabla */}
+        {/* Buscador, Ordenamiento y Tabla */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center gap-2 mb-4 bg-slate-50 p-2 rounded border">
-            <Search className="text-slate-400" size={20} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre, apellido o DNI..." 
-              className="w-full bg-transparent focus:outline-none"
-              value={busqueda}
-              onChange={e => setBusqueda(e.target.value)}
-            />
+          
+          {/* NUEVO: Contenedor Flex para Buscador y Selector de Orden */}
+          <div className="flex flex-col md:flex-row gap-4 mb-4">
+            <div className="flex items-center gap-2 flex-1 bg-slate-50 p-2 rounded border">
+              <Search className="text-slate-400" size={20} />
+              <input 
+                type="text" 
+                placeholder="Buscar por nombre, apellido o DNI..." 
+                className="w-full bg-transparent focus:outline-none"
+                value={busqueda}
+                onChange={e => setBusqueda(e.target.value)}
+              />
+            </div>
+            
+            <select 
+              value={orden} 
+              onChange={e => setOrden(e.target.value)}
+              className="border p-2 rounded bg-slate-50 text-sm font-medium focus:outline-blue-500"
+            >
+              <option value="default">Orden de carga</option>
+              <option value="nombre">Ordenar por Nombre (A-Z)</option>
+              <option value="apellido">Ordenar por Apellido (A-Z)</option>
+            </select>
           </div>
 
           <div className="overflow-x-auto">
@@ -170,12 +187,12 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {asistentesFiltrados.length === 0 ? (
+                {asistentesFiltradosYOrdenados.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center p-6 text-slate-400">No hay asistentes cargados o no coinciden con la búsqueda.</td>
                   </tr>
                 ) : (
-                  asistentesFiltrados.map(a => (
+                  asistentesFiltradosYOrdenados.map(a => (
                     <tr key={a.id} className="border-b border-slate-100 hover:bg-slate-50">
                       <td className="p-3">
                         <button onClick={() => toggleAsistio(a.id)} className="text-slate-400 hover:text-green-500 transition-colors">
