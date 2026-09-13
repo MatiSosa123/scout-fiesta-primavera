@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Search, UserPlus, Trash2, CheckCircle2, Circle, Copy, Check } from 'lucide-react';
 
 function App() {
   // Estado principal: la lista de asistentes
@@ -10,9 +10,12 @@ function App() {
 
   // Estado para el buscador
   const [busqueda, setBusqueda] = useState('');
+  
+  // Estado para el ordenamiento
+  const [orden, setOrden] = useState('default');
 
-  // NUEVO: Estado para el ordenamiento
-  const [orden, setOrden] = useState('default'); // Opciones: 'default', 'nombre', 'apellido'
+  // Estado para el botón de copiar alias
+  const [copiado, setCopiado] = useState(false);
 
   // Estado para el formulario de nuevo ingreso
   const [form, setForm] = useState({
@@ -27,6 +30,13 @@ function App() {
   useEffect(() => {
     localStorage.setItem('asistentesFiesta', JSON.stringify(asistentes));
   }, [asistentes]);
+
+  // Función para copiar el alias al portapapeles
+  const copiarAlias = () => {
+    navigator.clipboard.writeText("matias-sosa.mp");
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000); // Vuelve a la normalidad en 2 segundos
+  };
 
   const agregarAsistente = (e) => {
     e.preventDefault();
@@ -60,7 +70,7 @@ function App() {
     ));
   };
 
-  // --- Lógica de Filtrado y Ordenamiento ---
+  // Lógica de Filtrado y Ordenamiento
   const asistentesFiltradosYOrdenados = asistentes
     .filter(a => {
       const texto = busqueda.toLowerCase();
@@ -73,10 +83,10 @@ function App() {
     .sort((a, b) => {
       if (orden === 'nombre') return a.nombre.localeCompare(b.nombre);
       if (orden === 'apellido') return a.apellido.localeCompare(b.apellido);
-      return 0; // Si es 'default', no ordena
+      return 0;
     });
 
-  // --- Lógica de Recaudación ---
+  // Lógica de Recaudación
   const calcularTotal = () => {
     let total = 0;
     asistentes.forEach(a => {
@@ -100,6 +110,33 @@ function App() {
           <div className="text-right">
             <p className="text-sm text-slate-500 uppercase font-semibold">Recaudación Total</p>
             <p className="text-3xl font-bold text-green-600">${calcularTotal().toLocaleString('es-AR')}</p>
+          </div>
+        </div>
+
+        {/* Zona de Pagos / Mercado Pago (SOLO ALIAS) */}
+        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-700 flex items-center gap-2">
+              💳 Datos para Transferir
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">
+              Los chicos pueden transferir directamente a este Alias.
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 bg-slate-50 border p-3 rounded-lg">
+            <span className="font-mono text-lg font-bold text-blue-600 select-all">
+              matias-sosa.mp
+            </span>
+            <button 
+              onClick={copiarAlias}
+              className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-colors ${
+                copiado ? 'bg-green-500 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              {copiado ? <Check size={16} /> : <Copy size={16} />}
+              {copiado ? '¡Copiado!' : 'Copiar Alias'}
+            </button>
           </div>
         </div>
 
@@ -149,8 +186,6 @@ function App() {
 
         {/* Buscador, Ordenamiento y Tabla */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          
-          {/* NUEVO: Contenedor Flex para Buscador y Selector de Orden */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex items-center gap-2 flex-1 bg-slate-50 p-2 rounded border">
               <Search className="text-slate-400" size={20} />
@@ -162,7 +197,6 @@ function App() {
                 onChange={e => setBusqueda(e.target.value)}
               />
             </div>
-            
             <select 
               value={orden} 
               onChange={e => setOrden(e.target.value)}
