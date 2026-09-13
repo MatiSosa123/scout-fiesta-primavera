@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, Trash2, CheckCircle2, Circle, Copy, Check } from 'lucide-react';
+import { Search, UserPlus, Trash2, CheckCircle2, Circle, Copy, Check, Download } from 'lucide-react';
 
 function App() {
   // Estado principal: la lista de asistentes
@@ -35,7 +35,45 @@ function App() {
   const copiarAlias = () => {
     navigator.clipboard.writeText("matias-sosa.mp");
     setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000); // Vuelve a la normalidad en 2 segundos
+    setTimeout(() => setCopiado(false), 2000);
+  };
+
+  // NUEVO: Función para exportar a Excel (CSV)
+  const exportarACSV = () => {
+    if (asistentes.length === 0) {
+      alert("No hay asistentes para exportar.");
+      return;
+    }
+
+    // 1. Definimos las cabeceras de las columnas
+    const cabeceras = ["Nombre", "Apellido", "DNI", "Tipo", "Pago", "Asistio"];
+    
+    // 2. Mapeamos los datos a filas, envolviendo textos en comillas para evitar errores con comas
+    const filas = asistentes.map(a => [
+      `"${a.nombre}"`,
+      `"${a.apellido}"`,
+      `"${a.dni}"`,
+      `"${a.tipo}"`,
+      `"${a.pago}"`,
+      a.asistio ? "SI" : "NO"
+    ]);
+
+    // 3. Unimos todo con comas y saltos de línea
+    const contenidoCSV = [cabeceras.join(","), ...filas.map(f => f.join(","))].join("\n");
+
+    // 4. Agregamos el BOM (\uFEFF) para que Excel reconozca las tildes y ñ
+    const blob = new Blob(["\uFEFF" + contenidoCSV], { type: "text/csv;charset=utf-8;" });
+    
+    // 5. Creamos un enlace temporal y forzamos la descarga
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    // Le ponemos la fecha al nombre del archivo
+    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    link.setAttribute("download", `Lista_Fiesta_Primavera_${fecha}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const agregarAsistente = (e) => {
@@ -186,6 +224,8 @@ function App() {
 
         {/* Buscador, Ordenamiento y Tabla */}
         <div className="bg-white p-6 rounded-lg shadow-md">
+          
+          {/* Contenedor Flex para Buscador, Orden y Botón de Excel */}
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex items-center gap-2 flex-1 bg-slate-50 p-2 rounded border">
               <Search className="text-slate-400" size={20} />
@@ -197,6 +237,7 @@ function App() {
                 onChange={e => setBusqueda(e.target.value)}
               />
             </div>
+            
             <select 
               value={orden} 
               onChange={e => setOrden(e.target.value)}
@@ -206,6 +247,15 @@ function App() {
               <option value="nombre">Ordenar por Nombre (A-Z)</option>
               <option value="apellido">Ordenar por Apellido (A-Z)</option>
             </select>
+
+            {/* NUEVO: Botón de Exportar a Excel */}
+            <button 
+              onClick={exportarACSV}
+              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors text-sm"
+            >
+              <Download size={18} />
+              Exportar a Excel
+            </button>
           </div>
 
           <div className="overflow-x-auto">
