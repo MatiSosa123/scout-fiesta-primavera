@@ -14,34 +14,37 @@ function LoginPage() {
     e.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/admin'); // Si el login es exitoso, va al panel
+      navigate('/admin');
     } catch (err) {
       setError('Email o contraseña incorrectos.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center">
-        <div className="flex justify-center mb-4 text-blue-600">
-          <Lock size={48} />
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center p-6">
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-4 border-orange-500">
+        <div className="flex justify-center mb-4">
+          <div className="bg-orange-100 p-4 rounded-full">
+            <Lock className="text-orange-500" size={40} />
+          </div>
         </div>
-        <h1 className="text-2xl font-bold text-slate-800 mb-6">Acceso Administrador</h1>
+        <h1 className="text-2xl font-bold text-blue-900 mb-2">Acceso Administrador</h1>
+        <p className="text-slate-500 text-sm mb-6">Solo para el tesorero del grupo</p>
         
-        {error && <p className="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm">{error}</p>}
+        {error && <p className="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm font-medium">{error}</p>}
         
         <form onSubmit={handleLogin} className="space-y-4">
           <input 
             type="email" placeholder="Email" required 
-            className="w-full border p-3 rounded-lg focus:outline-blue-500"
+            className="w-full border-2 border-slate-200 p-3 rounded-lg focus:outline-none focus:border-blue-900 transition-colors"
             value={email} onChange={e => setEmail(e.target.value)}
           />
           <input 
             type="password" placeholder="Contraseña" required 
-            className="w-full border p-3 rounded-lg focus:outline-blue-500"
+            className="w-full border-2 border-slate-200 p-3 rounded-lg focus:outline-none focus:border-blue-900 transition-colors"
             value={password} onChange={e => setPassword(e.target.value)}
           />
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+          <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-orange-200">
             Ingresar
           </button>
         </form>
