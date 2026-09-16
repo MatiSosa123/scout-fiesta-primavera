@@ -11,13 +11,12 @@ function PublicPage() {
     setTimeout(() => setCopiado(false), 2000);
   };
 
-  // NUEVA FUNCIÓN: Copia el alias y redirige a Mercado Pago
   const pagarAhora = () => {
     navigator.clipboard.writeText("matias-sosa.mp");
     setCopiado(true);
     setTimeout(() => setCopiado(false), 3000);
     
-    // Abrimos Mercado Pago después de un pequeño delay para que dé tiempo a copiar
+    // Abrimos Mercado Pago después de un pequeño delay
     setTimeout(() => {
       window.open("https://www.mercadopago.com.ar/", "_blank");
     }, 800);
@@ -26,7 +25,7 @@ function PublicPage() {
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-6">
       <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center space-y-6">
-        <h1 className="text-3xl font-bold text-slate-800">Fiesta de la Primavera</h1>
+        <h1 className="text-3xl font-bold text-slate-800">🌸 Fiesta de la Primavera</h1>
         <p className="text-slate-500 font-medium">Transferí tu entrada a este Alias:</p>
         
         <div className="bg-slate-50 border p-4 rounded-lg flex flex-col items-center gap-4">

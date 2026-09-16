@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Search, UserPlus, Trash2, CheckCircle2, Circle, Download, Users, UserCheck, AlertCircle } from 'lucide-react';
-import { db } from '../firebase';
+import { Search, UserPlus, Trash2, CheckCircle2, Circle, Download, Users, UserCheck, AlertCircle, LogOut } from 'lucide-react';
+import { db, auth } from '../firebase';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
 
 function AdminPage() {
   const [asistentes, setAsistentes] = useState([]);
@@ -39,11 +40,16 @@ function AdminPage() {
   const agregarAsistente = async (e) => {
     e.preventDefault();
     if (!form.nombre || !form.apellido || !form.dni) return;
-    try { await addDoc(collection(db, "asistentes"), { ...form, asistio: false }); setForm({ nombre: '', apellido: '', dni: '', tipo: 'Scout', pago: 'Preventa' }); } catch (error) { console.error(error); }
+    try { 
+      await addDoc(collection(db, "asistentes"), { ...form, asistio: false }); 
+      setForm({ nombre: '', apellido: '', dni: '', tipo: 'Scout', pago: 'Preventa' }); 
+    } catch (error) { console.error(error); }
   };
 
   const eliminarAsistente = async (id) => {
-    if (window.confirm('¿Estás seguro de eliminar a esta persona?')) { try { await deleteDoc(doc(db, "asistentes", id)); } catch (error) { console.error(error); } }
+    if (window.confirm('¿Estás seguro de eliminar a esta persona?')) { 
+      try { await deleteDoc(doc(db, "asistentes", id)); } catch (error) { console.error(error); } 
+    }
   };
 
   const toggleAsistio = async (id, estadoActual) => {
@@ -81,17 +87,29 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-slate-100 p-6">
       <div className="max-w-5xl mx-auto space-y-6">
+        
+        {/* Encabezado con botón de salir */}
         <div className="bg-white p-6 rounded-lg shadow-md flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Panel de Administración</h1>
+            <h1 className="text-3xl font-bold text-slate-800">🌸 Panel de Administración</h1>
             <p className="text-slate-500">Control de Entradas - Manada y Tropa</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-slate-500 uppercase font-semibold">Recaudación Total</p>
-            <p className="text-3xl font-bold text-green-600">${calcularTotal().toLocaleString('es-AR')}</p>
+          <div className="flex items-center gap-6">
+            <div className="text-right">
+              <p className="text-sm text-slate-500 uppercase font-semibold">Recaudación Total</p>
+              <p className="text-3xl font-bold text-green-600">${calcularTotal().toLocaleString('es-AR')}</p>
+            </div>
+            <button 
+              onClick={() => signOut(auth)} 
+              className="flex items-center gap-2 bg-red-100 hover:bg-red-200 text-red-700 font-semibold px-4 py-2 rounded-lg transition-colors"
+            >
+              <LogOut size={18} />
+              Salir
+            </button>
           </div>
         </div>
 
+        {/* Panel de Estadísticas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-400 flex items-center justify-between">
             <div><p className="text-xs text-slate-500 font-semibold uppercase">Scouts</p><p className="text-2xl font-bold text-slate-700">{stats.scouts}</p></div>
@@ -111,6 +129,7 @@ function AdminPage() {
           </div>
         </div>
 
+        {/* Formulario de Carga */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-slate-700 flex items-center gap-2"><UserPlus size={20} /> Agregar Asistente</h2>
           <form onSubmit={agregarAsistente} className="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -131,6 +150,7 @@ function AdminPage() {
           </form>
         </div>
 
+        {/* Buscador, Ordenamiento y Tabla */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="flex flex-col md:flex-row gap-4 mb-4">
             <div className="flex items-center gap-2 flex-1 bg-slate-50 p-2 rounded border">
