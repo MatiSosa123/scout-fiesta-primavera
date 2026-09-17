@@ -21,11 +21,25 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-4 border-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-800 flex items-center justify-center p-6 relative overflow-hidden">
+      
+      {/* FONDO: Logo gigante sutil (blanco para que se vea en el fondo oscuro) */}
+      <img 
+        src="/logo.png" 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-contain opacity-[0.06] pointer-events-none select-none invert"
+      />
+
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-4 border-orange-500 relative z-10">
+        
+        {/* Logo chiquito */}
+        <div className="flex justify-center mb-2">
+          <img src="/logo.png" alt="Logo del Grupo" className="h-20 w-20 object-contain" />
+        </div>
+
         <div className="flex justify-center mb-4">
           <div className="bg-orange-100 p-4 rounded-full">
-            <Lock className="text-orange-500" size={40} />
+            <Lock className="text-orange-500" size={32} />
           </div>
         </div>
         <h1 className="text-2xl font-bold text-blue-900 mb-2">Acceso Administrador</h1>

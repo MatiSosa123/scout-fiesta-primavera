@@ -21,11 +21,25 @@ function PublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-6 border-t-4 border-orange-500">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-blue-50 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      
+      {/* FONDO: Logo gigante sutil */}
+      <img 
+        src="/logo.png" 
+        alt="" 
+        className="absolute inset-0 w-full h-full object-contain opacity-[0.04] pointer-events-none select-none"
+      />
+
+      {/* CONTENIDO */}
+      <div className="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center space-y-6 border-t-4 border-orange-500 relative z-10">
         
+        {/* Logo chiquito arriba */}
+        <div className="flex justify-center">
+          <img src="/logo.png" alt="Logo del Grupo" className="h-20 w-20 object-contain" />
+        </div>
+
         <div>
-          <div className="text-5xl mb-2">🌸</div>
+          <div className="text-4xl mb-2">🌸</div>
           <h1 className="text-3xl font-bold text-blue-900">Fiesta de la Primavera</h1>
           <p className="text-slate-500 text-sm mt-1">Manada y Tropa - Grupo Scout</p>
         </div>
